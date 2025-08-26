@@ -1,4 +1,3 @@
-import * as Linking from 'expo-linking';
 import * as NavigationBar from "expo-navigation-bar";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useRef, useState } from "react";
@@ -14,27 +13,27 @@ export default function HomeScreen() {
 
   const insets = useSafeAreaInsets();
 
-  useEffect(() => {
-    const handleUrl = (event) => {
-      const url = event.url;
-      console.log("برگشت از درگاه:", url);
-      // اینجا میتونید URL رو به وب‌ویو بدهید یا نمایش پیام بدهید
-      if (url.startsWith("zipay://premium/join/")) {
-        webviewRef.current?.injectJavaScript(`
-          window.location.href = "${url.replace('zipay://', 'https://fxman.xyz/')}";
-        `);
-      }
-    };
+  // useEffect(() => {
+  //   const handleUrl = (event) => {
+  //     const url = event.url;
+  //     console.log("برگشت از درگاه:", url);
+  //     // اینجا میتونید URL رو به وب‌ویو بدهید یا نمایش پیام بدهید
+  //     if (url.startsWith("zipay://premium/join/")) {
+  //       webviewRef.current?.injectJavaScript(`
+  //         window.location.href = "${url.replace('zipay://', 'https://fxman.xyz/')}";
+  //       `);
+  //     }
+  //   };
 
-    const subscription = Linking.addEventListener('url', handleUrl);
+  //   const subscription = Linking.addEventListener('url', handleUrl);
 
-    // اگر اپ در زمان باز شدن از طریق URL اجرا شد
-    Linking.getInitialURL().then((url) => {
-      if (url) handleUrl({ url });
-    });
+  //   // اگر اپ در زمان باز شدن از طریق URL اجرا شد
+  //   Linking.getInitialURL().then((url) => {
+  //     if (url) handleUrl({ url });
+  //   });
 
-    return () => subscription.remove();
-  }, []);
+  //   return () => subscription.remove();
+  // }, []);
 
   const enableFullscreen = async () => {
     if (Platform.OS === "android") {
