@@ -1,7 +1,7 @@
 import * as NavigationBar from "expo-navigation-bar";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useRef, useState } from "react";
-import { BackHandler, Platform, StyleSheet, View } from "react-native";
+import { BackHandler, Dimensions, Linking, Platform, SafeAreaView, StyleSheet } from "react-native";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { WebView } from "react-native-webview";
 
@@ -9,31 +9,11 @@ export default function HomeScreen() {
 
   const [fullscreen, setFullscreen] = useState(false);
   const [canGoBack, setCanGoBack] = useState(false);
+  const homeUrl = "https://fxman.xyz";
+  const [url, setUrl] = useState(homeUrl);
   const webviewRef = useRef(null);
 
   const insets = useSafeAreaInsets();
-
-  // useEffect(() => {
-  //   const handleUrl = (event) => {
-  //     const url = event.url;
-  //     console.log("برگشت از درگاه:", url);
-  //     // اینجا میتونید URL رو به وب‌ویو بدهید یا نمایش پیام بدهید
-  //     if (url.startsWith("zipay://premium/join/")) {
-  //       webviewRef.current?.injectJavaScript(`
-  //         window.location.href = "${url.replace('zipay://', 'https://fxman.xyz/')}";
-  //       `);
-  //     }
-  //   };
-
-  //   const subscription = Linking.addEventListener('url', handleUrl);
-
-  //   // اگر اپ در زمان باز شدن از طریق URL اجرا شد
-  //   Linking.getInitialURL().then((url) => {
-  //     if (url) handleUrl({ url });
-  //   });
-
-  //   return () => subscription.remove();
-  // }, []);
 
   const enableFullscreen = async () => {
     if (Platform.OS === "android") {
@@ -89,17 +69,34 @@ export default function HomeScreen() {
 
 
   return (
-    <View style={styles.container}>
-      <WebView
+    <SafeAreaView  style={styles.container}>
+
+        <WebView
         ref={webviewRef}
-        source={{ uri: "https://fxman.xyz" }}
-        style={[styles.webview, fullscreen ? {} : { marginTop: insets.top, marginBottom: insets.bottom }]} // 🔑 مارجین فقط در حالت غیر فول‌اسکرین
+        source={{ uri: url }}
+        style={[styles.webview, fullscreen ? {} : { marginTop: insets.top, marginBottom: insets.bottom, height: Dimensions.get("window").height }]} // 🔑 مارجین فقط در حالت غیر فول‌اسکرین
         allowsFullscreenVideo={true}
         mediaPlaybackRequiresUserAction={false}
         javaScriptEnabled={true}
         onNavigationStateChange={handleNavigationChange}
+        setSupportMultipleWindows={false} // 👈 خیلی مهم
+        onShouldStartLoadWithRequest={(request) => {
+          const allowedDomain = "fxman.xyz";
+
+          if (request.url.includes(allowedDomain)) {
+            return true; // لینک داخلی
+          }
+
+          // لینک خارجی:
+          Linking.openURL(request.url); // باز کردن تو مرورگر
+          webviewRef.current?.injectJavaScript(`
+            window.location.href = "${homeUrl}";
+          `);// برگشت به صفحه اصلی
+          return false;
+        }}
       />
-    </View>
+      
+    </SafeAreaView >
   );
 }
 

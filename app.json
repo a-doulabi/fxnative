@@ -8,6 +8,10 @@
     "scheme": "filmonix",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "updates": {
+      "url": "https://u.expo.dev/86aeabf4-de8f-4dc9-8393-1991e9c055cc",
+      "fallbackToCacheTimeout": 0
+    },
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
