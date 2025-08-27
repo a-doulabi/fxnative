@@ -9,6 +9,8 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "updates": {
+      "enabled": true,
+      "checkAutomatically": "ON_LOAD",
       "url": "https://u.expo.dev/86aeabf4-de8f-4dc9-8393-1991e9c055cc",
       "fallbackToCacheTimeout": 0
     },
@@ -17,7 +19,14 @@
       "infoPlist": {
         "CFBundleURLTypes": [
           {
-            "CFBundleURLSchemes": ["filmonix"]
+            "CFBundleURLSchemes": [
+              "filmonix"
+            ]
+          },
+          {
+            "CFBundleURLSchemes": [
+              "filmonix"
+            ]
           }
         ]
       }
@@ -28,19 +37,7 @@
         "backgroundColor": "#121212"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.hamsadeh.ney.webview",
-      "intentFilters": [
-        {
-          "action": "VIEW",
-          "data": [
-            {
-              "scheme": "filmonix",
-              "host": "*"
-            }
-          ],
-          "category": ["BROWSABLE", "DEFAULT"]
-        }
-      ]
+      "package": "com.hamsadeh.ney.webview"
     },
     "web": {
       "bundler": "metro",
@@ -67,6 +64,9 @@
       "eas": {
         "projectId": "86aeabf4-de8f-4dc9-8393-1991e9c055cc"
       }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
     }
   }
 }

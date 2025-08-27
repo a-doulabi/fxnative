@@ -6,12 +6,14 @@
     "production-apk": {
       "android": {
         "buildType": "apk"
-      }
+      },
+      "channel": "production"
     },
     "production-aab": {
       "android": {
         "buildType": "app-bundle"
-      }
+      },
+      "channel": "production"
     }
   }
 }
