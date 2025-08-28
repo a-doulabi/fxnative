@@ -1,4 +1,5 @@
 import * as NavigationBar from "expo-navigation-bar";
+import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useRef, useState } from "react";
 import { BackHandler, Dimensions, Linking, Platform, SafeAreaView, StyleSheet } from "react-native";
@@ -9,11 +10,17 @@ export default function HomeScreen() {
 
   const [fullscreen, setFullscreen] = useState(false);
   const [canGoBack, setCanGoBack] = useState(false);
-  const homeUrl = "https://fxman.xyz";
+  const homeUrl = "https://apk.fxbob.com";
   const [url, setUrl] = useState(homeUrl);
   const webviewRef = useRef(null);
 
   const insets = useSafeAreaInsets();
+
+  SplashScreen.preventAutoHideAsync();
+
+  const handleWebViewLoad = () => {
+    SplashScreen.hideAsync(); // وقتی وب‌ویو آماده شد اسپلش بسته میشه
+  };
 
   const enableFullscreen = async () => {
     if (Platform.OS === "android") {
@@ -78,10 +85,17 @@ export default function HomeScreen() {
         allowsFullscreenVideo={true}
         mediaPlaybackRequiresUserAction={false}
         javaScriptEnabled={true}
+        onLoadEnd={handleWebViewLoad}
+        injectedJavaScriptBeforeContentLoaded={`
+          if (!localStorage.getItem('isMobileApp')) {
+            localStorage.setItem('isMobileApp', '1');
+          }
+          true;
+        `}
         onNavigationStateChange={handleNavigationChange}
         setSupportMultipleWindows={false} // 👈 خیلی مهم
         onShouldStartLoadWithRequest={(request) => {
-          const allowedDomain = "fxman.xyz";
+          const allowedDomain = "fxbob.com";
 
           if (request.url.includes(allowedDomain)) {
             return true; // لینک داخلی
