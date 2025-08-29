@@ -2,7 +2,7 @@ import * as NavigationBar from "expo-navigation-bar";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useRef, useState } from "react";
-import { BackHandler, Dimensions, Linking, Platform, SafeAreaView, StyleSheet } from "react-native";
+import { BackHandler, Button, Dimensions, Linking, Platform, SafeAreaView, StyleSheet, Text } from "react-native";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { WebView } from "react-native-webview";
 
@@ -10,6 +10,7 @@ export default function HomeScreen() {
 
   const [fullscreen, setFullscreen] = useState(false);
   const [canGoBack, setCanGoBack] = useState(false);
+  const [hasError, setHasError] = useState(false);
   const homeUrl = "https://apk.fxbob.com";
   const [url, setUrl] = useState(homeUrl);
   const webviewRef = useRef(null);
@@ -77,7 +78,16 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView  style={styles.container}>
-
+        
+        {hasError ? <SafeAreaView style={[styles.container, { justifyContent: "center", alignItems: "center" }]}>
+            <Text style={{ color: "#fff", fontSize: 16, textAlign: "center", marginBottom: 20 }}>
+              مشکلی در بارگذاری صفحه پیش آمد. {"\n"}لطفاً اتصال اینترنت را بررسی کنید.
+            </Text>
+            <Button title="تلاش مجدد" onPress={() => {
+              setHasError(false);
+              webviewRef.current?.reload(); // تلاش دوباره برای بارگذاری
+            }} />
+          </SafeAreaView> : 
         <WebView
         ref={webviewRef}
         source={{ uri: url }}
@@ -108,7 +118,10 @@ export default function HomeScreen() {
           `);// برگشت به صفحه اصلی
           return false;
         }}
-      />
+        onError={() => setHasError(true)}
+        onHttpError={() => setHasError(true)}
+      />}
+        
       
     </SafeAreaView >
   );
