@@ -24,11 +24,24 @@
         }
       ]
     ],
+    "ios": {
+      "supportsTablet": true,
+      "infoPlist": {
+        "CFBundleURLTypes": [
+          {
+            "CFBundleURLSchemes": [
+              "filmonix"
+            ]
+          }
+        ]
+      }
+    },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#000000"
       },
+      "edgeToEdgeEnabled": true,
       "package": "fxman.filmonix"
     },
     "web": {
@@ -47,9 +60,6 @@
     },
     "runtimeVersion": {
       "policy": "appVersion"
-    },
-    "cli": {
-      "appVersionSource": "local"
     }
   }
 }
