@@ -1,5 +1,5 @@
 import * as NavigationBar from "expo-navigation-bar";
-import * as SplashScreen from "expo-splash-screen";
+// import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useRef, useState } from "react";
 import { BackHandler, Button, Dimensions, Linking, Platform, SafeAreaView, StyleSheet, Text } from "react-native";
@@ -17,11 +17,11 @@ export default function HomeScreen() {
 
   const insets = useSafeAreaInsets();
 
-  SplashScreen.preventAutoHideAsync();
+  // SplashScreen.preventAutoHideAsync();
 
-  const handleWebViewLoad = () => {
-    SplashScreen.hideAsync(); // وقتی وب‌ویو آماده شد اسپلش بسته میشه
-  };
+  // const handleWebViewLoad = () => {
+  //   SplashScreen.hideAsync(); // وقتی وب‌ویو آماده شد اسپلش بسته میشه
+  // };
 
   const enableFullscreen = async () => {
     if (Platform.OS === "android") {
