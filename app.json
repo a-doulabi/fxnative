@@ -45,7 +45,10 @@
       "package": "fxman.filmonix",
       "minSdkVersion": 21,
       "enableProguardInReleaseBuilds": true,
-      "abiFilters": ["armeabi-v7a", "arm64-v8a", "x86", "x86_64"]
+      "abiFilters": ["armeabi-v7a", "arm64-v8a", "x86", "x86_64"],
+      "metaData": {
+          "expo-channel-name": "production"
+        }
     },
     "web": {
       "bundler": "metro",
