@@ -2,15 +2,28 @@ import * as NavigationBar from "expo-navigation-bar";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useRef, useState } from "react";
-import { BackHandler, Button, Dimensions, Linking, Platform, SafeAreaView, StyleSheet, Text } from "react-native";
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import {
+  ActivityIndicator,
+  BackHandler,
+  Button,
+  Dimensions,
+  Linking,
+  Platform,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  View
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { WebView } from "react-native-webview";
 
 export default function HomeScreen() {
-
   const [fullscreen, setFullscreen] = useState(false);
   const [canGoBack, setCanGoBack] = useState(false);
   const [hasError, setHasError] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
+  
+
   const homeUrl = "https://apk.fxbob.com";
   const [url, setUrl] = useState(homeUrl);
   const webviewRef = useRef(null);
@@ -20,31 +33,32 @@ export default function HomeScreen() {
   SplashScreen.preventAutoHideAsync();
 
   const handleWebViewLoad = () => {
-    SplashScreen.hideAsync(); // وقتی وب‌ویو آماده شد اسپلش بسته میشه
+    setInitialLoading(false);
+    SplashScreen.hideAsync();
+    if (initialLoading) {
+      setInitialLoading(false); // فقط بار اول لودینگ بسته بشه
+      SplashScreen.hideAsync();
+    }
   };
 
   const enableFullscreen = async () => {
     if (Platform.OS === "android") {
-      await NavigationBar.setVisibilityAsync("hidden"); // مخفی کردن نوار پایین
-      // await NavigationBar.setBackgroundColorAsync("black"); // رنگ پس‌زمینه
+      await NavigationBar.setVisibilityAsync("hidden");
     }
-    StatusBar.setHidden(true, "fade"); // مخفی کردن نوار بالا
-
-    setFullscreen(true)
+    StatusBar.setHidden(true, "fade");
+    setFullscreen(true);
   };
 
   const disableFullscreen = async () => {
     if (Platform.OS === "android") {
       await NavigationBar.setVisibilityAsync("visible");
-      // await NavigationBar.setBackgroundColorAsync("white");
     }
     StatusBar.setHidden(false, "fade");
-    setFullscreen(false)
+    setFullscreen(false);
   };
 
   const handleNavigationChange = (navState) => {
     setCanGoBack(navState.canGoBack);
-    // فقط وقتی آدرس شامل /watch/ هست Fullscreen فعال میشه
     if (navState.url.includes("/watch/")) {
       enableFullscreen();
     } else {
@@ -53,77 +67,108 @@ export default function HomeScreen() {
   };
 
   useEffect(() => {
-  const onBackPress = () => {
-    if (webviewRef.current && canGoBack) {
-      webviewRef.current.goBack();
-      return true; // جلوگیری از بسته شدن اپ
-    }
-    return false; // اجازه میده اپ بسته بشه
-  };
+    const onBackPress = () => {
+      if (webviewRef.current && canGoBack) {
+        webviewRef.current.goBack();
+        return true;
+      }
+      return false;
+    };
 
-  const subscription = BackHandler.addEventListener(
-    "hardwareBackPress",
-    onBackPress
-  );
+    const subscription = BackHandler.addEventListener(
+      "hardwareBackPress",
+      onBackPress
+    );
 
-  return () => subscription.remove(); // ✅ این روش در نسخه‌های جدید درست است
-}, [canGoBack]);
+    return () => subscription.remove();
+  }, [canGoBack]);
 
 
-  // اطمینان از حالت اولیه (اگر صفحه /watch/ باز شد)
   useEffect(() => {
     enableFullscreen();
   }, []);
 
-
   return (
-    <SafeAreaView  style={styles.container}>
-        
-        {hasError ? <SafeAreaView style={[styles.container, { justifyContent: "center", alignItems: "center" }]}>
-            <Text style={{ color: "#fff", fontSize: 16, textAlign: "center", marginBottom: 20 }}>
-              مشکلی در بارگذاری صفحه پیش آمد. {"\n"}لطفاً اتصال اینترنت را بررسی کنید.
-            </Text>
-            <Button title="تلاش مجدد" onPress={() => {
+    <SafeAreaView style={styles.container}>
+      {hasError ? (
+        <SafeAreaView
+          style={[
+            styles.container,
+            { justifyContent: "center", alignItems: "center" },
+          ]}
+        >
+          <Text
+            style={{
+              color: "#fff",
+              fontSize: 16,
+              textAlign: "center",
+              marginBottom: 20,
+            }}
+          >
+            مشکلی در بارگذاری صفحه پیش آمد. {"\n"}لطفاً اتصال اینترنت را بررسی
+            کنید.
+          </Text>
+          <Button
+            title="تلاش مجدد"
+            onPress={() => {
               setHasError(false);
-              webviewRef.current?.reload(); // تلاش دوباره برای بارگذاری
-            }} />
-          </SafeAreaView> : 
-        <WebView
-        ref={webviewRef}
-        source={{ uri: url }}
-        style={[styles.webview, fullscreen ? {} : { marginTop: insets.top, marginBottom: insets.bottom, height: Dimensions.get("window").height }]} // 🔑 مارجین فقط در حالت غیر فول‌اسکرین
-        allowsFullscreenVideo={true}
-        mediaPlaybackRequiresUserAction={false}
-        javaScriptEnabled={true}
-        onLoadEnd={handleWebViewLoad}
-        injectedJavaScriptBeforeContentLoaded={`
-          if (!localStorage.getItem('isMobileApp')) {
-            localStorage.setItem('isMobileApp', '1');
-          }
-          true;
-        `}
-        onNavigationStateChange={handleNavigationChange}
-        setSupportMultipleWindows={false} // 👈 خیلی مهم
-        onShouldStartLoadWithRequest={(request) => {
-          const allowedDomain = "fxbob.com";
-
-          if (request.url.includes(allowedDomain)) {
-            return true; // لینک داخلی
-          }
-
-          // لینک خارجی:
-          Linking.openURL(request.url); // باز کردن تو مرورگر
-          webviewRef.current?.injectJavaScript(`
-            window.location.href = "${homeUrl}";
-          `);// برگشت به صفحه اصلی
-          return false;
-        }}
-        onError={() => setHasError(true)}
-        onHttpError={() => setHasError(true)}
-      />}
-        
-      
-    </SafeAreaView >
+              setLoading(true);
+              webviewRef.current?.reload();
+            }}
+          />
+        </SafeAreaView>
+      ) : (
+        <>
+          {initialLoading  && (
+            <View style={styles.loading}>
+              <ActivityIndicator size="large" color="#ffffff" />
+              <Text style={{ color: "#fff", marginTop: 10 }}>
+                در حال بارگذاری...
+              </Text>
+            </View>
+          )}
+          <WebView
+            ref={webviewRef}
+            source={{ uri: url }}
+            style={[
+              styles.webview,
+              fullscreen
+                ? {}
+                : {
+                    marginTop: insets.top,
+                    marginBottom: insets.bottom,
+                    height: Dimensions.get("window").height,
+                  },
+            ]}
+            allowsFullscreenVideo={true}
+            mediaPlaybackRequiresUserAction={false}
+            javaScriptEnabled={true}
+            onNavigationStateChange={handleNavigationChange}
+            onLoadEnd={handleWebViewLoad} // ✅ اتمام لود
+            injectedJavaScriptBeforeContentLoaded={`
+              if (!localStorage.getItem('isMobileApp')) {
+                localStorage.setItem('isMobileApp', '1');
+              }
+              true;
+            `}
+            setSupportMultipleWindows={false}
+            onShouldStartLoadWithRequest={(request) => {
+              const allowedDomain = "fxbob.com";
+              if (request.url.includes(allowedDomain)) {
+                return true;
+              }
+              Linking.openURL(request.url);
+              webviewRef.current?.injectJavaScript(`
+                window.location.href = "${homeUrl}";
+              `);
+              return false;
+            }}
+            onError={() => setHasError(true)}
+            onHttpError={() => setHasError(true)}
+          />
+        </>
+      )}
+    </SafeAreaView>
   );
 }
 
@@ -131,5 +176,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#121212",
+  },
+  loading: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "#121212",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 10,
   },
 });
