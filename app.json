@@ -10,9 +10,9 @@
     "newArchEnabled": true,
     "updates": {
       "enabled": true,
-      "checkAutomatically": "ON_LOAD",
+      "checkAutomatically": "NEVER",
       "url": "https://u.expo.dev/7c018731-19d5-48d1-aeab-9eb3300399d3",
-      "fallbackToCacheTimeout": 0
+      "fallbackToCacheTimeout": 1000
     },
     "plugins": [
       [
