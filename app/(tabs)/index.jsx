@@ -25,7 +25,7 @@ export default function HomeScreen() {
   const [initialLoading, setInitialLoading] = useState(true);
   
 
-  const homeUrl = "https://fxman.xyz"; //
+  const homeUrl = "https://next.fxman.xyz"; //
   const [url, setUrl] = useState(homeUrl);
   const webviewRef = useRef(null);
 
