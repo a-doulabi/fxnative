@@ -169,7 +169,7 @@ export default function HomeScreen() {
             `}
             setSupportMultipleWindows={false}
             onShouldStartLoadWithRequest={(request) => {
-              const allowedDomain = "fxbob.com";
+              const allowedDomain = "fxman.xyz";
               if (request.url.includes(allowedDomain)) {
                 return true;
               }
