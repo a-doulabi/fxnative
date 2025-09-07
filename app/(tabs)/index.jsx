@@ -38,6 +38,7 @@ const injectedJS = `
 `;
 
 export default function HomeScreen() {
+
   const [fullscreen, setFullscreen] = useState(false);
   const [canGoBack, setCanGoBack] = useState(false);
   const [hasError, setHasError] = useState(false);
@@ -52,6 +53,12 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
 
   SplashScreen.preventAutoHideAsync();
+
+  useEffect(() => {
+    Updates.channel = 'staging-channel';
+    enableFullscreen();
+    onFetchUpdateAsync();
+  }, []);
 
   async function onFetchUpdateAsync() {
     try {
@@ -139,12 +146,6 @@ export default function HomeScreen() {
 
     return () => subscription.remove();
   }, [canGoBack]);
-
-
-  useEffect(() => {
-    enableFullscreen();
-    onFetchUpdateAsync();
-  }, []);
 
   const handleMessage = (event) => {
     const link = event.nativeEvent.data;
