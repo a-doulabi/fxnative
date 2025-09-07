@@ -17,15 +17,35 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { WebView } from "react-native-webview";
+import CopyModal from "../../components/CopyModal";
+
+const injectedJS = `
+  (function() {
+    let timer;
+    document.addEventListener('touchstart', function(e) {
+      let target = e.target.closest('a');
+      if (!target) return;
+
+      timer = setTimeout(function() {
+        window.ReactNativeWebView.postMessage(target.href);
+      }, 600); // نگه داشتن 600ms
+    });
+
+    document.addEventListener('touchend', function(e) {
+      clearTimeout(timer);
+    });
+  })();
+`;
 
 export default function HomeScreen() {
   const [fullscreen, setFullscreen] = useState(false);
   const [canGoBack, setCanGoBack] = useState(false);
   const [hasError, setHasError] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
-  
+  const [modalVisible, setModalVisible] = useState(false);
+  const [currentLink, setCurrentLink] = useState("");
 
-  const homeUrl = "https://next.fxman.xyz"; //
+  const homeUrl = "https://next.fxman.xyz"; //MAKE SURE TO ALSO CHANGE ALLOWED DOMAINS
   const [url, setUrl] = useState(homeUrl);
   const webviewRef = useRef(null);
 
@@ -45,6 +65,28 @@ export default function HomeScreen() {
       // You can also add an alert() to see the error message in case of an error when fetching updates.
       alert(`Error fetching latest Expo update: ${error}`);
     }
+  }
+
+  const handleWebViewNavigation = (request, webviewRef, homeUrl) => {
+    
+    const allowedDomain = "fxman.xyz";
+    const url = request.url;
+
+    // لینک‌های داخلی سایت
+    if (url.includes(allowedDomain)) {
+      return true;
+    }
+
+    // بقیه لینک‌ها → مرورگر
+    Linking.openURL(url);
+
+    if (!url.includes("/dl/")) {
+      webviewRef.current && webviewRef.current.injectJavaScript(`
+        window.location.href = "${homeUrl}";
+      `);
+    }
+    
+    return false;
   }
 
   const handleWebViewLoad = () => {
@@ -104,6 +146,12 @@ export default function HomeScreen() {
     onFetchUpdateAsync();
   }, []);
 
+  const handleMessage = (event) => {
+    const link = event.nativeEvent.data;
+    setCurrentLink(link);
+    setModalVisible(true); // نمایش Modal
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       {hasError ? (
@@ -143,6 +191,11 @@ export default function HomeScreen() {
               </Text>
             </View>
           )}
+          <CopyModal
+            link={currentLink}
+            visible={modalVisible}
+            onClose={() => setModalVisible(false)}
+          />
           <WebView
             ref={webviewRef}
             source={{ uri: url }}
@@ -159,8 +212,10 @@ export default function HomeScreen() {
             allowsFullscreenVideo={true}
             mediaPlaybackRequiresUserAction={false}
             javaScriptEnabled={true}
+            onMessage={handleMessage}
             onNavigationStateChange={handleNavigationChange}
             onLoadEnd={handleWebViewLoad} // ✅ اتمام لود
+            injectedJavaScript={injectedJS}
             injectedJavaScriptBeforeContentLoaded={`
               if (!localStorage.getItem('isMobileApp')) {
                 localStorage.setItem('isMobileApp', '1');
@@ -168,17 +223,9 @@ export default function HomeScreen() {
               true;
             `}
             setSupportMultipleWindows={false}
-            onShouldStartLoadWithRequest={(request) => {
-              const allowedDomain = "fxman.xyz";
-              if (request.url.includes(allowedDomain)) {
-                return true;
+            onShouldStartLoadWithRequest={(request) =>
+                handleWebViewNavigation(request, webviewRef, homeUrl)
               }
-              Linking.openURL(request.url);
-              webviewRef.current?.injectJavaScript(`
-                window.location.href = "${homeUrl}";
-              `);
-              return false;
-            }}
             onError={() => setHasError(true)}
             onHttpError={() => setHasError(true)}
           />
