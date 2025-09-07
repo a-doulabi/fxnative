@@ -11,6 +11,12 @@
       "android": {
         "buildType": "apk"
       }
+    },
+    "staging": {
+      "channel": "staging",
+      "android": {
+        "buildType": "apk"
+      }
     }
   }
 }
