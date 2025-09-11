@@ -9,6 +9,8 @@ export default function CopyModal({ link, visible, onClose }) {
 
   if(!link) return null;
 
+  if(!link.includes('/dl/')) return null;
+
   return (
     <Modal transparent visible={visible} animationType="fade">
       <TouchableWithoutFeedback onPress={onClose}>
